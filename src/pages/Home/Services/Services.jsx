@@ -49,7 +49,7 @@ const ourServices = [
 
 const Services = () => {
   return (
-    <section className="py-16 bg-[#03373D] rounded-2xl">
+    <section className="py-16 bg-[#03373D] rounded-2xl my-3">
       <div className="max-w-7xl mx-auto px-4 text-center">
         <h2 className="text-4xl font-bold text-primary mb-4">Our Services</h2>
         <p className="max-w-2xl mx-auto mb-12 text-white/80">
@@ -61,13 +61,14 @@ const Services = () => {
             <div
               key={index}
               className="bg-white p-8 rounded-2xl shadow-lg 
-                         hover:bg-teal-600 hover:shadow-2xl 
+                         hover:bg-[#CAEB66] hover:shadow-2xl 
                          transition duration-300 ease-in-out
                          cursor-pointer"
             >
               {/* Icon color changes on hover */}
-              <div className="group-hover:text-white transition duration-300">
-                {React.cloneElement(service.icon, { className: `${service.icon.props.className} group-hover:text-white` })}
+              <div className="group-hover:text-white transition duration-300 mb-3">
+                {service.icon}
+                {/* {React.cloneElement(service.icon, { className: `${service.icon.props.className} group-hover:text-white` })} */}
               </div>
 
               {/* Title */}
