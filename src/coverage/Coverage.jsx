@@ -1,9 +1,10 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useLoaderData } from 'react-router';
 
-// Fixing default icon issue in Leaflet for React
+// Fix for missing Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png',
@@ -11,27 +12,104 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
 });
 
+const bangladeshBounds = [
+  [20.5, 88.0],
+  [26.7, 92.7]
+];
+
+//  FlyTo Component (uses animation)
+const FlyToLocation = ({ lat, lng }) => {
+  const map = useMap();
+  if (lat && lng) {
+    map.flyTo([lat, lng], 10, { duration: 2 }); // animated zoom to level 10
+  }
+  return null;
+};
+
+//  SearchBox
+const SearchBox = ({ input, setInput, onSearch }) => (
+  <div className="mb-4 text-center flex justify-center gap-2">
+    <input
+      type="text"
+      placeholder="Enter district name..."
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      className="px-4 py-2 border rounded-lg w-[300px] shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+    <button
+      onClick={onSearch}
+      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+    >
+      Search
+    </button>
+  </div>
+);
+
 const Coverage = () => {
-  const dhakaCoordinates = [23.8103, 90.4125]; // Central point in Bangladesh
+  const serviceCenters = useLoaderData();
+  const [inputDistrict, setInputDistrict] = useState('');
+  const [filteredCenters, setFilteredCenters] = useState(serviceCenters);
+  const [targetLocation, setTargetLocation] = useState(null);
+
+  const handleSearch = () => {
+    const match = serviceCenters.filter(center =>
+      center.district.toLowerCase().includes(inputDistrict.toLowerCase())
+    );
+    setFilteredCenters(match);
+
+    if (match.length > 0) {
+      setTargetLocation({ lat: match[0].latitude, lng: match[0].longitude });
+    } else {
+      setTargetLocation(null);
+      alert('No matching district found');
+    }
+  };
+  
 
   return (
-    <div className="w-full h-screen p-4 rounded-2xl">
-      <h2 className="text-2xl font-semibold mb-4 text-cyan-200 text-center">Our Coverage Area - Bangladesh</h2>
+    <div className="w-[800px] mx-auto my-4 rounded-lg shadow">
+      <h2 className="text-xl font-semibold text-center mb-2">
+        Warehouse Coverage in Bangladesh
+      </h2>
+
+      <SearchBox
+        input={inputDistrict}
+        setInput={setInputDistrict}
+        onSearch={handleSearch}
+      />
+
       <MapContainer
-        center={dhakaCoordinates}
-        zoom={7}
+        bounds={bangladeshBounds}
         scrollWheelZoom={true}
-        className="w-full h-[500px] rounded-xl shadow-md"
+        className="w-full h-[400px] rounded-lg"
+        zoomControl={true}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+          attribution="© OpenStreetMap contributors"
         />
-        <Marker position={dhakaCoordinates}>
-          <Popup>
-            Dhaka - Our main hub!
-          </Popup>
-        </Marker>
+
+        {targetLocation && (
+          <FlyToLocation lat={targetLocation.lat} lng={targetLocation.lng} />
+        )}
+
+        {filteredCenters.map((center, index) => (
+          <Marker key={index} position={[center.latitude, center.longitude]}>
+            <Popup>
+              <div>
+                <h3 className="font-bold">{center.city}, {center.district}</h3>
+                <p><strong>Region:</strong> {center.region}</p>
+                <p><strong>Covered Areas:</strong> {center.covered_area.join(', ')}</p>
+                <img
+                  src={center.flowchart}
+                  alt={`${center.city} flowchart`}
+                  className="mt-2 rounded"
+                  style={{ width: '100%', maxWidth: '200px' }}
+                />
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
