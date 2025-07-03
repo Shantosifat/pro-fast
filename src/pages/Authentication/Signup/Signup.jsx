@@ -2,9 +2,10 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import UseAuth from "../../../hooks/UseAuth";
 import SocialLogin from "../SocialLogin/SocialLogin";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const Signup = () => {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -18,6 +19,8 @@ const Signup = () => {
     createUser(data.email, data.password)
       .then((result) => {
         console.log(result.user);
+        navigate('/');
+
       })
       .catch((error) => {
         console.log(error);

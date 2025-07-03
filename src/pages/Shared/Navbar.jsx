@@ -1,12 +1,29 @@
 import React from "react";
-import { NavLink } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import Logo from "./Logo";
+import UseAuth from "../../hooks/UseAuth";
+import Swal from "sweetalert2";
 
 const Navbar = () => {
+  const { user, logOut } = UseAuth();
+  const navigate = useNavigate();
+  const handleLogOut = () => {
+    logOut()
+      .then(() => {
+        Swal.fire("Log Out Successful!");
+        navigate("/login");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
   const links = (
     <>
       <li>
         <NavLink to="/">Home</NavLink>
+      </li>
+      <li>
+        <NavLink to="/sendParcel">Send A Parcel</NavLink>
       </li>
       <li>
         <NavLink to="/coverage">Coverage</NavLink>
@@ -47,12 +64,29 @@ const Navbar = () => {
         <Logo></Logo>
       </div>
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-         {links}
-        </ul>
+        <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
-      <div className="navbar-end">
-        <a className="btn">Button</a>
+      <div className="navbar-end space-x-4">
+        {user ? (
+          <>
+            <div className="hidden md:flex flex-col text-right">
+              <span className="font-semibold text-sm">
+                {user.displayName || user.email}
+              </span>
+              <span className="text-xs text-gray-500">Logged In</span>
+            </div>
+            <button
+              onClick={handleLogOut}
+              className="btn btn-outline btn-error"
+            >
+              Log Out
+            </button>
+          </>
+        ) : (
+          <Link to="/login" className="btn btn-success">
+            Log In
+          </Link>
+        )}
       </div>
     </div>
   );

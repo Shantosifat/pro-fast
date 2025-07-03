@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -17,16 +17,18 @@ const bangladeshBounds = [
   [26.7, 92.7]
 ];
 
-//  FlyTo Component (uses animation)
+// FlyTo Component (uses animation)
 const FlyToLocation = ({ lat, lng }) => {
   const map = useMap();
-  if (lat && lng) {
-    map.flyTo([lat, lng], 10, { duration: 2 }); // animated zoom to level 10
-  }
+  useEffect(() => {
+    if (lat && lng) {
+      map.flyTo([lat, lng], 10, { duration: 2 });
+    }
+  }, [lat, lng, map]);
   return null;
 };
 
-//  SearchBox
+// SearchBox
 const SearchBox = ({ input, setInput, onSearch }) => (
   <div className="mb-4 text-center flex justify-center gap-2">
     <input
@@ -50,6 +52,7 @@ const Coverage = () => {
   const [inputDistrict, setInputDistrict] = useState('');
   const [filteredCenters, setFilteredCenters] = useState(serviceCenters);
   const [targetLocation, setTargetLocation] = useState(null);
+  const popupRef = useRef(null);
 
   const handleSearch = () => {
     const match = serviceCenters.filter(center =>
@@ -64,7 +67,13 @@ const Coverage = () => {
       alert('No matching district found');
     }
   };
-  
+
+  // Auto-open popup after targetLocation is set
+  useEffect(() => {
+    if (popupRef.current) {
+      popupRef.current.openPopup();
+    }
+  }, [targetLocation]);
 
   return (
     <div className="w-[800px] mx-auto my-4 rounded-lg shadow">
@@ -94,7 +103,11 @@ const Coverage = () => {
         )}
 
         {filteredCenters.map((center, index) => (
-          <Marker key={index} position={[center.latitude, center.longitude]}>
+          <Marker
+            key={index}
+            position={[center.latitude, center.longitude]}
+            ref={index === 0 ? popupRef : null} // only first match gets ref
+          >
             <Popup>
               <div>
                 <h3 className="font-bold">{center.city}, {center.district}</h3>
