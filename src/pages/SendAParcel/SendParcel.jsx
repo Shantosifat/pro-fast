@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import UseAuth from "../../hooks/UseAuth";
 import {
   FiCheckCircle,
@@ -433,7 +433,11 @@ const SendParcelForm = () => {
                     }}
                     className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition"
                   >
-                    <FiCreditCard /> Proceed to Payment
+                    <div>
+                      <Link className="flex items-center gap-2" to='/dashBoard/myParcels'>
+                      <FiCreditCard /> Proceed to Payment
+                      </Link>
+                    </div>
                   </button>
 
                   <button

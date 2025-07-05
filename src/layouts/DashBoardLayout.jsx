@@ -1,5 +1,6 @@
 import React from "react";
-import { Outlet } from "react-router";
+import { Link, NavLink, Outlet } from "react-router";
+import Logo from "../pages/Shared/Logo";
 
 const DashBoardLayout = () => {
   return (
@@ -44,14 +45,12 @@ const DashBoardLayout = () => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
+        <ul className="menu bg-base-200 text-base-content min-h-full space-y-3.5 w-80 p-4">
           {/* Sidebar content here */}
-          <li>
-            <a>Sidebar Item 1x</a>
-          </li>
-          <li>
-            <a>Sidebar Item 2x</a>
-          </li>
+          <Logo></Logo>
+          <NavLink to='/dashBoard/myParcels'>My parcels</NavLink>
+          <NavLink to='/sendParcel'>Payment</NavLink>
+         
         </ul>
       </div>
     </div>
