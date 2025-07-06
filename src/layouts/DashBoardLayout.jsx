@@ -1,6 +1,13 @@
 import React from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import Logo from "../pages/Shared/Logo";
+import {
+  FiHome,
+  FiPackage,
+  FiCreditCard,
+  FiTruck,
+  FiUser,
+} from "react-icons/fi";
 
 const DashBoardLayout = () => {
   return (
@@ -32,9 +39,7 @@ const DashBoardLayout = () => {
             </label>
           </div>
           <div className="mx-2 flex-1 px-2">Dashboard</div>
-          <div className="hidden flex-none lg:block">
-           
-          </div>
+          <div className="hidden flex-none lg:block"></div>
         </div>
         {/* Page content here */}
         <Outlet></Outlet>
@@ -48,9 +53,39 @@ const DashBoardLayout = () => {
         <ul className="menu bg-base-200 text-base-content min-h-full space-y-3.5 w-80 p-4">
           {/* Sidebar content here */}
           <Logo></Logo>
-          <NavLink to='/dashBoard/myParcels'>My parcels</NavLink>
-          <NavLink to='/dashBoard/payment'>Payment</NavLink>
-         
+          <div className="space-y-2">
+            <NavLink to="/dashBoard" className="flex items-center gap-2">
+              <FiHome /> Home
+            </NavLink>
+
+            <NavLink
+              to="/dashBoard/myParcels"
+              className="flex items-center gap-2"
+            >
+              <FiPackage /> My Parcels
+            </NavLink>
+
+            <NavLink
+              to="/dashBoard/paymentHistory"
+              className="flex items-center gap-2"
+            >
+              <FiCreditCard /> Payment History
+            </NavLink>
+
+            <NavLink
+              to="/dashBoard/trackPackage"
+              className="flex items-center gap-2"
+            >
+              <FiTruck /> Track a Package
+            </NavLink>
+
+            <NavLink
+              to="/dashBoard/updateProfile"
+              className="flex items-center gap-2"
+            >
+              <FiUser /> Update Profile
+            </NavLink>
+          </div>
         </ul>
       </div>
     </div>

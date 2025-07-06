@@ -6,10 +6,11 @@ import {
 } from "@stripe/react-stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import UseAxiosSecure from "../../hooks/UseAxiosSecure";
 import Loading from "../../pages/Shared/Loading";
 import UseAuth from "../../hooks/UseAuth";
+import Swal from "sweetalert2";
 
 const PaymentCard = () => {
   const axiosSecure = UseAxiosSecure();
@@ -19,6 +20,7 @@ const PaymentCard = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const { id: parcelId } = useParams();
+  const navigate = useNavigate();
   //   console.log(parcelId);
   const { isPending, data: parcelData = {} } = useQuery({
     queryKey: ["parcels", parcelId],
@@ -83,13 +85,35 @@ const PaymentCard = () => {
     } else {
       // Payment succeeded
       setError("");
-      // if (result.paymentIntent.status === "succeeded") {
-      //   console.log("payment success");
-      //   console.log(result);
-      // }
-      // or
-      console.log("Payment succeeded:", result.paymentIntent);
-      console.log(result);
+      if (result.paymentIntent.status === "succeeded") {
+        console.log("payment success");
+        console.log(result);
+        const transactionId = result.paymentIntent.id;
+        // step 4 : mark parcel paid also create payment history
+        const paymentData = {
+          parcelId,
+          email: user.email,
+          // userName: user.displayName,
+          // paymentIntentId: result.paymentIntent.id,
+          amount,
+          transactionId: transactionId,
+          paymentMethod: result.paymentIntent.payment_method_types,
+        };
+        const paymentRes = await axiosSecure.post("/payments", paymentData);
+        if (paymentRes.data.insertedId) {
+          await Swal.fire({
+            icon: "success",
+            title: "Payment Successful",
+            html: `
+    <p>Your payment has been recorded successfully!</p>
+    <p><strong>Transaction ID:</strong> ${transactionId}</p>
+  `,
+            confirmButtonText: "Go to My Parcels",
+          });
+          // redirect to my parcels
+          navigate("/dashBoard/myParcels");
+        }
+      }
     }
   };
   return (
@@ -104,7 +128,7 @@ const PaymentCard = () => {
           className="btn btn-primary w-full"
           disabled={!stripe}
         >
-          Pay ${amount}
+          Pay ৳{amount}
         </button>
         {error && <p className="text-red-500">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
