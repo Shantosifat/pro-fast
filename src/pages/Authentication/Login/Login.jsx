@@ -2,24 +2,26 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import UseAuth from "../../../hooks/UseAuth";
 import SocialLogin from "../SocialLogin/SocialLogin";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 const Login = () => {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { signin } = UseAuth();
+  const location = useLocation();
+  const from = location.state?.from || "/";
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { signin } = UseAuth();
 
   const onSubmit = (data) => {
     console.log(data);
     signin(data.email, data.password)
       .then((result) => {
         console.log(result.user);
-        navigate('/')
+        navigate(from);
       })
       .catch((error) => {
         console.log(error);
@@ -59,7 +61,12 @@ const Login = () => {
             </p>
           )}
           <button className="btn btn-success mt-4">Login</button>
-          <p className="my-2">New Here? Go To <Link className="btn-link text-cyan-400" to='/signup'>SignUp</Link></p>
+          <p className="my-2">
+            New Here? Go To{" "}
+            <Link className="btn-link text-cyan-400" to="/signup">
+              SignUp
+            </Link>
+          </p>
         </fieldset>
       </form>
       <SocialLogin></SocialLogin>

@@ -33,17 +33,17 @@ const SendParcelForm = () => {
     ];
   };
 
-  const getCentersByDistrict = (region, district) => {
-    return [
-      ...new Set(
-        serviceCenters
-          .filter(
-            (item) => item.region === region && item.district === district
-          )
-          .map((item) => item.city) // city as service center
-      ),
-    ];
-  };
+  // const getCentersByDistrict = (region, district) => {
+  //   return [
+  //     ...new Set(
+  //       serviceCenters
+  //         .filter(
+  //           (item) => item.region === region && item.district === district
+  //         )
+  //         .map((item) => item.city) // city as service center
+  //     ),
+  //   ];
+  // };
 
   const {
     register,
@@ -54,42 +54,48 @@ const SendParcelForm = () => {
 
   const parcelType = watch("parcelType");
   const senderRegion = watch("senderRegion");
-  const senderDistrict = watch("senderDistrict");
+  // const senderDistrict = watch("senderDistrict");
   const receiverRegion = watch("receiverRegion");
-  const receiverDistrict = watch("receiverDistrict");
+  // const receiverDistrict = watch("receiverDistrict");
 
   const onSubmit = (data) => {
-    // Calculate cost & breakdown
     let cost = 50;
     let breakdown = ["Base delivery charge: ৳50"];
 
-    if (data.parcelType === "non-document") {
-      const weightCost = (data.weight || 0) * 20;
+    // Convert weight to a number (0 if undefined or not valid)
+    const weight = parseFloat(data.weight) || 0;
+
+    if (data.parcelType === "non-document" && weight > 0) {
+      const weightCost = weight * 20;
       cost += weightCost;
       breakdown.push(`Weight charge (৳20/kg): ৳${weightCost}`);
     }
+
     if (data.senderRegion !== data.receiverRegion) {
       cost += 30;
       breakdown.push("Inter-region charge: ৳30");
     }
 
-    // Order info
     const orderInfo = {
       ...data,
+      weight, // ensure it's stored as number, not string
       created_by: user.email,
-      payment_status: 'unpaid',
-      delivery_status: 'not-collected',
-      trackingId: `PKG-${uuidv4().slice(0, 8).toUpperCase()}`, // e.g. PKG-1A2B3C4D
+      payment_status: "unpaid",
+      delivery_status: "not-collected",
+      trackingId: `PKG-${uuidv4().slice(0, 8).toUpperCase()}`,
       orderDate: new Date().toISOString(),
+      cost, // ✅ make sure cost is added
     };
-    console.log(orderInfo);
 
-    axiosSecure.post('/parcels', orderInfo).then(res=>{
-      console.log(res.data)
-      if(res.data.insertedId){
-        console.log('baby');
+
+    // Save to backend
+    axiosSecure.post("/parcels", orderInfo).then((res) => {
+      console.log(res.data);
+      if (res.data.insertedId) {
+        console.log(res.data);
+        console.log("Parcel added with cost:", cost);
       }
-    })
+    });
 
     // Set modal data
     setCostData({ total: cost, breakdown, form: data, orderInfo });
@@ -153,7 +159,9 @@ const SendParcelForm = () => {
             <h2 className="text-xl font-semibold mb-4">Sender Info</h2>
 
             <input
-              {...register("senderName", { required: "Sender name is required" })}
+              {...register("senderName", {
+                required: "Sender name is required",
+              })}
               defaultValue={user?.displayName}
               placeholder="Sender Name"
               className="w-full mb-3 border rounded px-3 py-2"
@@ -163,16 +171,22 @@ const SendParcelForm = () => {
             )}
 
             <input
-              {...register("senderContact", { required: "Sender contact is required" })}
+              {...register("senderContact", {
+                required: "Sender contact is required",
+              })}
               placeholder="Sender Contact"
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.senderContact && (
-              <p className="text-red-600 mb-3">{errors.senderContact.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.senderContact.message}
+              </p>
             )}
 
             <select
-              {...register("senderRegion", { required: "Sender region is required" })}
+              {...register("senderRegion", {
+                required: "Sender region is required",
+              })}
               className="w-full mb-3 border rounded px-3 py-2 text-primary"
             >
               <option value="">Select Region</option>
@@ -187,7 +201,9 @@ const SendParcelForm = () => {
             )}
 
             <select
-              {...register("senderDistrict", { required: "Sender district is required" })}
+              {...register("senderDistrict", {
+                required: "Sender district is required",
+              })}
               className="w-full mb-3 border rounded px-3 py-2 text-primary"
               disabled={!senderRegion}
             >
@@ -200,45 +216,37 @@ const SendParcelForm = () => {
                 ))}
             </select>
             {errors.senderDistrict && (
-              <p className="text-red-600 mb-3">{errors.senderDistrict.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.senderDistrict.message}
+              </p>
             )}
 
-            {/* <select
-              {...register("senderCenter", { required: "Sender service center is required" })}
-              className="w-full mb-3 border rounded px-3 py-2 text-primary"
-              disabled={!senderDistrict}
-            >
-              <option value="">Select Center</option>
-              {senderRegion &&
-                senderDistrict &&
-                getCentersByDistrict(senderRegion, senderDistrict).map((center) => (
-                  <option key={center} value={center}>
-                    {center}
-                  </option>
-                ))}
-            </select> */}
-            {/* {errors.senderCenter && (
-              <p className="text-red-600 mb-3">{errors.senderCenter.message}</p>
-            )} */}
-
             <textarea
-              {...register("senderAddress", { required: "Sender address is required" })}
+              {...register("senderAddress", {
+                required: "Sender address is required",
+              })}
               placeholder="Sender Address"
               rows={2}
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.senderAddress && (
-              <p className="text-red-600 mb-3">{errors.senderAddress.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.senderAddress.message}
+              </p>
             )}
 
             <textarea
-              {...register("senderInstruction", { required: "Pickup instruction is required" })}
+              {...register("senderInstruction", {
+                required: "Pickup instruction is required",
+              })}
               placeholder="Pickup Instruction"
               rows={2}
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.senderInstruction && (
-              <p className="text-red-600 mb-3">{errors.senderInstruction.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.senderInstruction.message}
+              </p>
             )}
           </div>
 
@@ -247,7 +255,9 @@ const SendParcelForm = () => {
             <h2 className="text-xl font-semibold mb-4">Receiver Info</h2>
 
             <input
-              {...register("receiverName", { required: "Receiver name is required" })}
+              {...register("receiverName", {
+                required: "Receiver name is required",
+              })}
               placeholder="Receiver Name"
               className="w-full mb-3 border rounded px-3 py-2"
             />
@@ -256,16 +266,22 @@ const SendParcelForm = () => {
             )}
 
             <input
-              {...register("receiverContact", { required: "Receiver contact is required" })}
+              {...register("receiverContact", {
+                required: "Receiver contact is required",
+              })}
               placeholder="Receiver Contact"
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.receiverContact && (
-              <p className="text-red-600 mb-3">{errors.receiverContact.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.receiverContact.message}
+              </p>
             )}
 
             <select
-              {...register("receiverRegion", { required: "Receiver region is required" })}
+              {...register("receiverRegion", {
+                required: "Receiver region is required",
+              })}
               className="w-full mb-3 border rounded px-3 py-2 text-primary"
             >
               <option value="">Select Region</option>
@@ -276,11 +292,15 @@ const SendParcelForm = () => {
               ))}
             </select>
             {errors.receiverRegion && (
-              <p className="text-red-600 mb-3">{errors.receiverRegion.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.receiverRegion.message}
+              </p>
             )}
 
             <select
-              {...register("receiverDistrict", { required: "Receiver district is required" })}
+              {...register("receiverDistrict", {
+                required: "Receiver district is required",
+              })}
               className="w-full mb-3 border rounded px-3 py-2 text-primary"
               disabled={!receiverRegion}
             >
@@ -293,45 +313,37 @@ const SendParcelForm = () => {
                 ))}
             </select>
             {errors.receiverDistrict && (
-              <p className="text-red-600 mb-3">{errors.receiverDistrict.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.receiverDistrict.message}
+              </p>
             )}
 
-            {/* <select
-              {...register("receiverCenter", { required: "Receiver service center is required" })}
-              className="w-full mb-3 border rounded px-3 py-2 text-primary"
-              disabled={!receiverDistrict}
-            >
-              <option value="">Select Center</option>
-              {receiverRegion &&
-                receiverDistrict &&
-                getCentersByDistrict(receiverRegion, receiverDistrict).map((center) => (
-                  <option key={center} value={center}>
-                    {center}
-                  </option>
-                ))}
-            </select>
-            {errors.receiverCenter && (
-              <p className="text-red-600 mb-3">{errors.receiverCenter.message}</p>
-            )} */}
-
             <textarea
-              {...register("receiverAddress", { required: "Receiver address is required" })}
+              {...register("receiverAddress", {
+                required: "Receiver address is required",
+              })}
               placeholder="Receiver Address"
               rows={2}
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.receiverAddress && (
-              <p className="text-red-600 mb-3">{errors.receiverAddress.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.receiverAddress.message}
+              </p>
             )}
 
             <textarea
-              {...register("receiverInstruction", { required: "Delivery instruction is required" })}
+              {...register("receiverInstruction", {
+                required: "Delivery instruction is required",
+              })}
               placeholder="Delivery Instruction"
               rows={2}
               className="w-full mb-3 border rounded px-3 py-2"
             />
             {errors.receiverInstruction && (
-              <p className="text-red-600 mb-3">{errors.receiverInstruction.message}</p>
+              <p className="text-red-600 mb-3">
+                {errors.receiverInstruction.message}
+              </p>
             )}
           </div>
         </div>
@@ -401,7 +413,9 @@ const SendParcelForm = () => {
                         title: "Order Confirmed!",
                         html: `
                           Your parcel order has been placed.<br/>
-                          Tracking ID: <strong>${costData.orderInfo.trackingId}</strong><br/>
+                          Tracking ID: <strong>${
+                            costData.orderInfo.trackingId
+                          }</strong><br/>
                           Order Date: <strong>${new Date(
                             costData.orderInfo.orderDate
                           ).toLocaleString()}</strong>
@@ -434,8 +448,11 @@ const SendParcelForm = () => {
                     className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition"
                   >
                     <div>
-                      <Link className="flex items-center gap-2" to='/dashBoard/myParcels'>
-                      <FiCreditCard /> Proceed to Payment
+                      <Link
+                        className="flex items-center gap-2"
+                        to="/dashBoard/myParcels"
+                      >
+                        <FiCreditCard /> Proceed to Payment
                       </Link>
                     </div>
                   </button>

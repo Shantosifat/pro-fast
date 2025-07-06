@@ -49,7 +49,7 @@ const DashBoardLayout = () => {
           {/* Sidebar content here */}
           <Logo></Logo>
           <NavLink to='/dashBoard/myParcels'>My parcels</NavLink>
-          <NavLink to='/sendParcel'>Payment</NavLink>
+          <NavLink to='/dashBoard/payment'>Payment</NavLink>
          
         </ul>
       </div>

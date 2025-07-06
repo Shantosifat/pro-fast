@@ -3,10 +3,12 @@ import UseAuth from "../../hooks/UseAuth";
 import UseAxiosSecure from "../../hooks/UseAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2"; // ✅ NEW: SweetAlert2 import
+import { useNavigate } from "react-router";
 
 const MyParcels = () => {
   const { user } = UseAuth();
   const axiosSecure = UseAxiosSecure();
+  const navigate = useNavigate();
 
   const {
     data: parcels = [],
@@ -18,6 +20,11 @@ const MyParcels = () => {
       return res.data;
     },
   });
+
+  const handlePay=(id)=>{
+    console.log('proceed to payment', id);
+    navigate(`/dashBoard/payment/${id}`)
+  }
 
   // ✅ UPDATED: handleDelete with SweetAlert
   const handleDelete = async (id) => {
@@ -94,7 +101,9 @@ const MyParcels = () => {
                   </button>
 
                   {parcel.payment_status === "unpaid" && (
-                    <button className="btn btn-sm bg-green-100 text-green-700 hover:bg-green-200">
+                    <button
+                    onClick={() => handlePay(parcel._id)}
+                     className="btn btn-sm bg-green-100 text-green-700 hover:bg-green-200">
                       Pay
                     </button>
                   )}
