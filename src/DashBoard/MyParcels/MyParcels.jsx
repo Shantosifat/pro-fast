@@ -14,9 +14,16 @@ const MyParcels = () => {
     data: parcels = [],
     refetch,
   } = useQuery({
-    queryKey: ["my-parcels", user.email],
+    queryKey: ["my-parcels", user?.email],
     queryFn: async () => {
-      const res = await axiosSecure.get(`/parcels?email=${user.email}`);
+      const res = await axiosSecure.get(`/parcels?email=${user.email}`
+      //   ,{
+      //   headers:{
+      //     Authorization: `Bearer ${user.accessToken}`       // server site e chole jabe ei info
+
+      //   }
+      // }
+    );
       return res.data;
     },
   });
@@ -56,6 +63,7 @@ const MyParcels = () => {
     <div className="max-w-7xl mx-auto px-4 py-6">
       <h2 className="text-2xl font-bold mb-4">My Parcels ({parcels.length})</h2>
 
+     
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 shadow rounded">
           <thead className="bg-gray-100 text-sm font-semibold text-gray-600">
