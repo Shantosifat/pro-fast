@@ -7,6 +7,8 @@ import {
   FiCreditCard,
   FiTruck,
   FiUser,
+  FiUsers,
+  FiClock,
 } from "react-icons/fi";
 
 const DashBoardLayout = () => {
@@ -84,6 +86,21 @@ const DashBoardLayout = () => {
               className="flex items-center gap-2"
             >
               <FiUser /> Update Profile
+            </NavLink>
+
+            {/* riders link  */}
+            <NavLink
+              to="/dashboard/activeRiders"
+              className="flex items-center gap-2"
+            >
+              <FiUsers /> Active Riders
+            </NavLink>
+
+            <NavLink
+              to="/dashboard/pendingRiders"
+              className="flex items-center gap-2"
+            >
+              <FiClock /> Pending Riders
             </NavLink>
           </div>
         </ul>

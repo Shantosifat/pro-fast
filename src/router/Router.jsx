@@ -13,6 +13,8 @@ import Payment from "../DashBoard/payment/Payment";
 import PaymentHistory from "../DashBoard/PaymentHistory/PaymentHistory";
 import TrackPackage from "../DashBoard/TrackPackage/TrackPackage";
 import BeARider from "../BeARider/BeARider";
+import ActiveRiders from "../DashBoard/ActiveRiders/ActiveRiders";
+import PendingRiders from "../DashBoard/pendingRiders/PendingRiders";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +37,7 @@ export const router = createBrowserRouter([
             <BeARider></BeARider>
           </PrivateRoute>
         ),
+        loader: () => fetch("./warehouses.json"),
       },
       {
         path: "sendParcel",
@@ -71,6 +74,14 @@ export const router = createBrowserRouter([
         path: "trackPackage",
         Component: TrackPackage,
       },
+      {
+        path:'activeRiders',
+        Component: ActiveRiders
+      },
+      {
+        path:'pendingRiders',
+        Component: PendingRiders
+      }
     ],
   },
   {
