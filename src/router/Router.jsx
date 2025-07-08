@@ -12,6 +12,7 @@ import MyParcels from "../DashBoard/MyParcels/MyParcels";
 import Payment from "../DashBoard/payment/Payment";
 import PaymentHistory from "../DashBoard/PaymentHistory/PaymentHistory";
 import TrackPackage from "../DashBoard/TrackPackage/TrackPackage";
+import BeARider from "../BeARider/BeARider";
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,14 @@ export const router = createBrowserRouter([
         path: "coverage",
         Component: Coverage,
         loader: () => fetch("./warehouses.json"),
+      },
+      {
+        path: "beArider",
+        element: (
+          <PrivateRoute>
+            <BeARider></BeARider>
+          </PrivateRoute>
+        ),
       },
       {
         path: "sendParcel",
