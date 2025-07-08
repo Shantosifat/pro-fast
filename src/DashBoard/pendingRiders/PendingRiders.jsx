@@ -31,11 +31,6 @@ const PendingRiders = () => {
     setIsOpen(true);
   };
 
-  //   const handleAccept = (id) => {
-  //     axiosSecure.patch(`/riders/${id}`, { status: "approved" }).then(() => {
-  //       setRiders((prev) => prev.filter((r) => r._id !== id));
-  //     });
-  //   };
   const handleAccept = async (id) => {
     await axiosSecure.patch(`/riders/approve/${id}`, { status: "approved" });
     Swal.fire("Accepted!", "Rider has been approved.", "success");
@@ -43,76 +38,92 @@ const PendingRiders = () => {
   };
 
   const handleReject = async (id) => {
-    await axiosSecure.patch(`/riders/reject/${id}`, { status: "rejected" });
-    Swal.fire("Rejected!", "Rider has been rejected.", "error");
-    refetch();
-  };
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This rider will be permanently rejected!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, reject!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await axiosSecure.patch(`/riders/reject/${id}`, { status: "rejected" });
 
-  //   const handleReject = (id) => {
-  //     axiosSecure.patch(`/riders/${id}`, { status: "rejected" }).then(() => {
-  //       setRiders((prev) => prev.filter((r) => r._id !== id));
-  //     });
-  //   };
+        Swal.fire("Rejected!", "Rider has been rejected.", "error");
+        refetch();
+      }
+    });
+  };
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold text-green-700 mb-6">
         Pending Riders {riders.length}
       </h2>
-      <div className="overflow-x-auto rounded-xl">
-        <table className="table w-full">
-          <thead className="bg-green-100 text-green-800">
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Region</th>
-              <th>District</th>
-              <th>Contact</th>
-              <th>Applied </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(riders) &&
-              riders.map((rider) => (
-                <tr key={rider._id}>
-                  <td>{rider.name || "N/A"}</td>
-                  <td>{rider.email}</td>
-                  <td>{rider.region}</td>
-                  <td>{rider.district || "N/A"}</td>
-                  <td>{rider.contact}</td>
-                  <td>
-                    {rider.created_at
-                      ? new Date(rider.created_at).toLocaleString()
-                      : "N/A"}
-                  </td>
-                  <td className="space-x-1 flex items-center">
-                    <button
-                      onClick={() => handleView(rider)}
-                      className="btn btn-xs btn-info"
-                      aria-label="View"
-                    >
-                      <FiEye />
-                    </button>
-                    <button
-                      onClick={() => handleAccept(rider._id)}
-                      className="btn btn-xs btn-success"
-                      aria-label="Accept"
-                    >
-                      <FiCheck />
-                    </button>
-                    <button
-                      onClick={() => handleReject(rider._id)}
-                      className="btn btn-xs btn-error"
-                      aria-label="Reject"
-                    >
-                      <FiX />
-                    </button>
-                  </td>
+      <div>
+        {Array.isArray(riders) && riders.length === 0 ? (
+          <div className="text-center text-gray-500 font-medium py-10">
+            No pending riders found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-xl">
+            <table className="table w-full">
+              <thead className="bg-green-100 text-green-800">
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Region</th>
+                  <th>District</th>
+                  <th>Contact</th>
+                  <th>Applied </th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {riders.map((rider, index) => (
+                  <tr key={rider._id}>
+                    <td>{index + 1}</td>
+                    <td>{rider.name || "N/A"}</td>
+                    <td>{rider.email}</td>
+                    <td>{rider.region}</td>
+                    <td>{rider.district || "N/A"}</td>
+                    <td>{rider.contact}</td>
+                    <td>
+                      {rider.created_at
+                        ? new Date(rider.created_at).toLocaleString()
+                        : "N/A"}
+                    </td>
+                    <td className="space-x-1 flex items-center">
+                      <button
+                        onClick={() => handleView(rider)}
+                        className="btn btn-xs btn-info"
+                        aria-label="View"
+                      >
+                        <FiEye />
+                      </button>
+                      <button
+                        onClick={() => handleAccept(rider._id)}
+                        className="btn btn-xs btn-success"
+                        aria-label="Accept"
+                      >
+                        <FiCheck />
+                      </button>
+                      <button
+                        onClick={() => handleReject(rider._id)}
+                        className="btn btn-xs btn-error"
+                        aria-label="Reject"
+                      >
+                        <FiX />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Rider Info Modal */}
